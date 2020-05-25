@@ -63,7 +63,7 @@ class ViewController: UIViewController {
         
         let postData = postJsonBody.data(using: .utf8)
         
-        let dataTask = URLSession.shared.uploadTask(with: urlRequest, from: postData) { [weak self](data, response, error) in
+        let uploadTask = URLSession.shared.uploadTask(with: urlRequest, from: postData) { [weak self](data, response, error) in
             if let requestError = error{
                 defer{
                     DispatchQueue.main.async {
@@ -123,7 +123,7 @@ class ViewController: UIViewController {
                 }
             }
         }
-        dataTask.resume()
+        uploadTask.resume()
             
     }
     
