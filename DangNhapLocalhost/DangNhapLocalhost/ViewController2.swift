@@ -13,7 +13,7 @@ protocol SetUpDataDelegate: AnyObject{
 }
 
 class ViewController2: UIViewController {
-    weak var setUpdatDelegate: SetUpDataDelegate?
+    weak var setUpdataDelegate: SetUpDataDelegate?
     @IBOutlet weak var backgroundImage: UIImageView!
     @IBOutlet weak var name: UILabel!
     @IBOutlet weak var birthDay: UILabel!
@@ -23,6 +23,7 @@ class ViewController2: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         layoutSubView()
+        setUpInfomation()
     }
     
     func layoutSubView(){
@@ -37,7 +38,7 @@ class ViewController2: UIViewController {
     }
     
     func setUpInfomation(){
-        guard let data = self.setUpdatDelegate?.data else {return}
+        guard let data = self.setUpdataDelegate?.data else {return}
         self.name.text = data.name
         self.birthDay.text = data.birthDay
         self.gender.text = data.gender

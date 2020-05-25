@@ -53,29 +53,47 @@ class ViewController: UIViewController {
         
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue(self.txtEmail.text, forHTTPHeaderField: "email")
-        urlRequest.setValue(self.txtPassword.text, forHTTPHeaderField: "password")
         
-        let dataTask = URLSession.shared.dataTask(with: urlRequest) {[weak self] (data, response, error) in
-            guard let data = data, let response = response as? HTTPURLResponse else {
+        let postJsonBody = """
+        {
+        "email": "\(self.txtEmail.text!)",
+        "password": "\(self.txtPassword.text!)"
+        }
+        """
+        
+        let postData = postJsonBody.data(using: .utf8)
+        
+        let dataTask = URLSession.shared.uploadTask(with: urlRequest, from: postData) { [weak self](data, response, error) in
+            if let requestError = error{
                 defer{
                     DispatchQueue.main.async {
                         var alert = CustomAlert()
                         alert.vcDelegate = self
-                        alert.createAndImplementAlert(title: "Request Error", message: "Bad Request", type: .Invalid)
+                        alert.createAndImplementAlert(title: "REQUEST ERROR", message: "An Error occur while make request", type: .Invalid)
                     }
                 }
                 return
             }
             
-            if let requestError = error{
-               defer{
-                   DispatchQueue.main.async {
-                       var alert = CustomAlert()
-                       alert.vcDelegate = self
-                    alert.createAndImplementAlert(title: "\(response.statusCode)", message: "\(requestError.localizedDescription)", type: .Invalid)
-                   }
-               }
+            guard let response = response as? HTTPURLResponse else {
+                defer{
+                    DispatchQueue.main.async {
+                        var alert = CustomAlert()
+                        alert.vcDelegate = self
+                        alert.createAndImplementAlert(title: "REQUEST ERROR", message: "Has no response", type: .Invalid)
+                    }
+                }
+                return
+            }
+            
+            guard let data = data else {
+                defer{
+                    DispatchQueue.main.async {
+                        var alert = CustomAlert()
+                        alert.vcDelegate = self
+                        alert.createAndImplementAlert(title: "Bad Request", message: "Status code: \(response.statusCode)", type: .Invalid)
+                    }
+                }
                 return
             }
             
@@ -85,20 +103,28 @@ class ViewController: UIViewController {
                     DispatchQueue.main.async {
                         var alert = CustomAlert()
                         alert.vcDelegate = self
-                        alert.createAndImplementAlert(title: "200", message: "Login success", type: .Valid)
+                        alert.createAndImplementAlert(title: "LOGIN SUCCESS", message: "Status code: \(response.statusCode)", type: .Valid)
                         alert.submitAction = {
                             [weak self](_) -> Void in
-                            let view2 = ViewController2()
+                            var view2 = ViewController2()
+                            view2.setUpdataDelegate = self
                             self?.present(view2, animated: true, completion: nil)
                         }
                     }
                 }catch{
-                    print(error.localizedDescription)
+                    defer{
+                        DispatchQueue.main.async {
+                            var alert = CustomAlert()
+                            alert.vcDelegate = self
+                            alert.createAndImplementAlert(title: "DECODE ERROR", message: "\(error.localizedDescription)", type: .Invalid)
+                        }
+                    }
+                    return
                 }
             }
-            
         }
         dataTask.resume()
+            
     }
     
     func validateInfo() throws{
