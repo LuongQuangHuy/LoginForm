@@ -75,23 +75,12 @@ class ViewController: UIViewController {
                 return
             }
             
-            guard let response = response as? HTTPURLResponse else {
+            guard let response = response as? HTTPURLResponse , let data = data else {
                 defer{
                     DispatchQueue.main.async {
                         var alert = CustomAlert()
                         alert.vcDelegate = self
                         alert.createAndImplementAlert(title: "REQUEST ERROR", message: "Has no response", type: .Invalid)
-                    }
-                }
-                return
-            }
-            
-            guard let data = data else {
-                defer{
-                    DispatchQueue.main.async {
-                        var alert = CustomAlert()
-                        alert.vcDelegate = self
-                        alert.createAndImplementAlert(title: "Bad Request", message: "Status code: \(response.statusCode)", type: .Invalid)
                     }
                 }
                 return
@@ -121,6 +110,16 @@ class ViewController: UIViewController {
                     }
                     return
                 }
+            }else{
+                defer{
+                    DispatchQueue.main.async {
+                        var alert = CustomAlert()
+                        alert.vcDelegate = self
+                        alert.createAndImplementAlert(title: "BAD REQUEST", message: "Status code: \(response.statusCode)", type: .Invalid)
+                    }
+                }
+                return
+                
             }
         }
         uploadTask.resume()
